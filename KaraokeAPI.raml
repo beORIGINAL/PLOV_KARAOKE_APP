@@ -1,0 +1,166 @@
+#%RAML 1.0
+title: Karaoke API
+version: v1
+baseUri: http://localhost/api/
+types:
+
+  ReservarionPatch:
+    type: object
+    properties:
+      id: integer
+      isActive: boolean
+      songsPerLap?: integer
+    example: |
+      {
+        "id": 1,
+        "isActive": true,
+        "songsPerLap": 1
+      }
+
+  Reservarion:
+    type: ReservarionPatch
+    properties:
+      name: string
+
+  Song:
+    type: object
+    properties:
+      id: string
+      artist: string
+      title: string
+
+  QueuePost:
+    type: object
+    properties:
+      reservationId: integer
+      songId: string
+
+  QueuePut:
+    type: QueuePost
+    properties:
+      id: string
+      reservationId: integer
+      songId: string
+      isFoercedQueue: boolean
+      isPlayed: boolean
+
+  Queue:
+    type: QueuePut
+    properties:
+      reservationName: string
+      songArtist: string
+      songTitle: string
+      lapIndex: integer
+      playedDate?: datetime-only
+
+/reservations:
+  get:
+    queryParameters:
+      isActiveOnly:
+        type: boolean
+        required: false
+        default: true
+
+    responses:
+      200:
+        body:
+          application/json:
+            type: Reservarion[]
+            example: |
+              [
+                {
+                  "id": 1,
+                  "isActive": true,
+                  "songsPerLap": 1,
+                  "name": "Reservation 1"
+                }
+              ]
+  /{id}:
+    patch:
+      body:
+        application/json:
+          type: ReservarionPatch
+          example: |
+            {
+              "id": 1,
+              "isActive": true,
+              "songsPerLap": 2
+            }
+      responses:
+        202:
+          description: No Content
+/queue:
+  get:
+    queryParameters:
+      reservationId?: integer
+
+    responses:
+      200:
+        body:
+          application/json:
+            type: Queue[]
+            example: |
+              [
+                {
+                  "id": "2B16AA97-1128-4C4E-A3AC-44820F7788F1",
+                  "reservationId": 1,
+                  "reservationName": "Reservation 1",
+                  "songId": "2B16AA97-1128-4C4E-A3AC-44820F7788F1",
+                  "songArtist": "Song Artist",
+                  "songTitle": "Song Title",
+                  "lapIndex": 10,
+                  "isFoercedQueue": true,
+                  "isPlayed": true,
+                  "playedDate": "2016-11-14T17:55:00"
+                }
+              ]
+  post:
+    body:
+      application/json:
+        type: QueuePost
+        example: |
+          {
+            "reservationId": 1,
+            "songId": "2B16AA97-1128-4C4E-A3AC-44820F7788F1"
+          }
+  /{id}:
+    put:
+      body:
+        application/json:
+          type: QueuePut
+          example: |
+            {
+              "id": "2B16AA97-1128-4C4E-A3AC-44820F7788F1",
+              "reservationId": 1,
+              "songId": "2B16AA97-1128-4C4E-A3AC-44820F7788F1",
+              "isFoercedQueue": true,
+              "isPlayed": true
+            }
+      responses:
+        202:
+          description: No Content
+    delete:
+      responses:
+        204:
+          description: No Content
+        404:
+          description: Not Found
+/songs:
+  get:
+    queryParameters:
+      s?: string
+      startWith: string
+
+    responses:
+      200:
+        body:
+          application/json:
+            type: Song[]
+            example: |
+              [
+                {
+                  "id": "2B16AA97-1128-4C4E-A3AC-44820F7788F1",
+                  "artist": "Song Artist",
+                  "title": "Song Title"
+                }
+              ]
